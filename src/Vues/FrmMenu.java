@@ -39,7 +39,7 @@ public class FrmMenu extends JFrame {
 
         monPlanning = new HashMap<>();
         mesProjets = new HashMap<>();
-        taches = new ArrayList<>();
+
 
 
         this.addWindowListener(new WindowAdapter() {
@@ -67,12 +67,20 @@ public class FrmMenu extends JFrame {
                     Tache maTache = new Tache(txtTache.getText(), cboAssigne.getSelectedItem().toString(), false); // on ajoute les valeurs saisie dans l'objet maTache
 
                     if (!monPlanning.containsKey(lstTheme.getSelectedValue())) { // S'il n'existe pas
+                        mesProjets = new HashMap<>(); // on reset le hash map
+                        taches = new ArrayList<>(); // on reset le hash map
                         taches.add(maTache); // on ajoute l'objet au tableau
                         mesProjets.put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le tableau avec la clé qu'on get la valeur en la transformant en string dans mesProjets
                         monPlanning.put(lstTheme.getSelectedValue().toString(), mesProjets); // on ajoute le HashMap avec la clé qu'on get la valeur en la transformant en string dans monPlanning
                     } else { // S'il existe dans la clé alors
-                        taches.add(maTache); // on ajoute l'objet au tableau
-                        mesProjets.put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le tableau avec la clé qu'on get la valeur en la transformant en string dans mesProjets
+                        mesProjets = new HashMap<>();
+                        if (monPlanning.get(lstTheme.getSelectedValue().toString()).containsKey(lstProjets.getSelectedValue().toString())){
+                            monPlanning.get(lstTheme.getSelectedValue().toString()).get(lstProjets.getSelectedValue().toString()).add(maTache);
+                        }else {
+                            taches = new ArrayList<>(); // on reset le hash map
+                            taches.add(maTache); // on ajoute l'objet au tableau
+                            monPlanning.get(lstTheme.getSelectedValue().toString()).put(lstProjets.getSelectedValue().toString(), taches);
+                        }
                     }
 
                     DefaultMutableTreeNode noeudTheme = null;
