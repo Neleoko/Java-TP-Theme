@@ -7,6 +7,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -40,29 +42,69 @@ public class FrmMenu extends JFrame {
         taches = new ArrayList<>();
 
 
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowOpened(WindowEvent e) {
+                super.windowOpened(e); // Quand la fenetre souvre
+
+                root = new DefaultMutableTreeNode("Les tâches à faire"); // permet de créer root qui est un noeud de base avec un nom en ""
+                model = new DefaultTreeModel(root); // permet de créer model qui peut avoir des noeud enfant
+                trTache.setModel(model); // on ajoute le model dans le Jtree
+            }
+        });
+
         btnValider.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (lstTheme.getSelectedValue() == null){
-                    JOptionPane.showMessageDialog(null,"Sélectionner un thème", "Choix du thème", JOptionPane.ERROR_MESSAGE);
+                if (lstTheme.getSelectedValue() == null) {
+                    JOptionPane.showMessageDialog(null, "Sélectionner un thème", "Choix du thème", JOptionPane.ERROR_MESSAGE);
                 } else if (lstProjets.getSelectedValue() == null) {
-                    JOptionPane.showMessageDialog(null,"Séléctionner un projet", "Choix du projet", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Séléctionner un projet", "Choix du projet", JOptionPane.ERROR_MESSAGE);
                 } else if (txtTache.getText().compareTo("") == 0) {
-                    JOptionPane.showMessageDialog(null,"Saisir une tâche", "Choix de la tâche", JOptionPane.ERROR_MESSAGE);
-                }else {
-                    if (monPlanning.containsKey(lstTheme.getSelectedValue())){ // S'il existe dans la clé alors
+                    JOptionPane.showMessageDialog(null, "Saisir une tâche", "Choix de la tâche", JOptionPane.ERROR_MESSAGE);
+                } else {
 
-                    }else { // S'il n'existe pas
-                        Tache maTache = new Tache(txtTache.getText(), cboAssigne.getSelectedItem().toString(), false); // on ajoute les valeurs saisie dans l'objet maTache
+                    Tache maTache = new Tache(txtTache.getText(), cboAssigne.getSelectedItem().toString(), false); // on ajoute les valeurs saisie dans l'objet maTache
 
+                    if (!monPlanning.containsKey(lstTheme.getSelectedValue())) { // S'il n'existe pas
                         taches.add(maTache); // on ajoute l'objet au tableau
                         mesProjets.put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le tableau avec la clé qu'on get la valeur en la transformant en string dans mesProjets
                         monPlanning.put(lstTheme.getSelectedValue().toString(), mesProjets); // on ajoute le HashMap avec la clé qu'on get la valeur en la transformant en string dans monPlanning
-                        root.removeAllChildren();
+                    } else { // S'il existe dans la clé alors
+                        taches.add(maTache); // on ajoute l'objet au tableau
+                        mesProjets.put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le tableau avec la clé qu'on get la valeur en la transformant en string dans mesProjets
                     }
-                    JOptionPane.showMessageDialog(null,"Ajout reussi");
-                }
 
+                    DefaultMutableTreeNode noeudTheme = null;
+                    DefaultMutableTreeNode noeudProjets = null;
+                    DefaultMutableTreeNode noeudTache = null;
+
+                    root.removeAllChildren();
+
+                    for (String thm : monPlanning.keySet()) {
+                        noeudTheme = new DefaultMutableTreeNode(thm);
+
+                        for (String prj : monPlanning.get(thm).keySet()) {
+                            noeudProjets = new DefaultMutableTreeNode(prj);
+
+                            for (Tache tch : monPlanning.get(thm).get(prj)) {
+                                noeudTache = new DefaultMutableTreeNode(tch.getNomTache());
+                                noeudProjets.add(noeudTache);
+                                noeudTache = new DefaultMutableTreeNode(tch.getNomDeveloppeur());
+                                noeudProjets.add(noeudTache);
+                                noeudTache = new DefaultMutableTreeNode(tch.isEstTerminee());
+                                noeudProjets.add(noeudTache);
+                            }
+                            noeudTheme.add(noeudProjets);
+                        }
+                        root.add(noeudTheme);
+                    }
+                    model = new DefaultTreeModel(root);
+                    trTache.setModel(model);
+
+
+                }
+                JOptionPane.showMessageDialog(null, "Ajout reussi");
             }
         });
     }
