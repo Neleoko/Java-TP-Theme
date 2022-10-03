@@ -56,63 +56,71 @@ public class FrmMenu extends JFrame {
         btnValider.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (lstTheme.getSelectedValue() == null) {
+
+                if (lstTheme.getSelectedValue() == null) { // si theme est pas choisis
                     JOptionPane.showMessageDialog(null, "Sélectionner un thème", "Choix du thème", JOptionPane.ERROR_MESSAGE);
-                } else if (lstProjets.getSelectedValue() == null) {
+                } else if (lstProjets.getSelectedValue() == null) { // si le projets est pas choisis
                     JOptionPane.showMessageDialog(null, "Séléctionner un projet", "Choix du projet", JOptionPane.ERROR_MESSAGE);
-                } else if (txtTache.getText().compareTo("") == 0) {
+                } else if (txtTache.getText().compareTo("") == 0) { // si la tache est pas choisis
                     JOptionPane.showMessageDialog(null, "Saisir une tâche", "Choix de la tâche", JOptionPane.ERROR_MESSAGE);
-                } else {
+                } else { // Tout est ok !
 
                     Tache maTache = new Tache(txtTache.getText(), cboAssigne.getSelectedItem().toString(), false); // on ajoute les valeurs saisie dans l'objet maTache
 
-                    if (!monPlanning.containsKey(lstTheme.getSelectedValue())) { // S'il n'existe pas
-                        mesProjets = new HashMap<>(); // on reset le hash map
-                        taches = new ArrayList<>(); // on reset le hash map
-                        taches.add(maTache); // on ajoute l'objet au tableau
-                        mesProjets.put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le tableau avec la clé qu'on get la valeur en la transformant en string dans mesProjets
-                        monPlanning.put(lstTheme.getSelectedValue().toString(), mesProjets); // on ajoute le HashMap avec la clé qu'on get la valeur en la transformant en string dans monPlanning
-                    } else { // S'il existe dans la clé alors
-                        mesProjets = new HashMap<>();
-                        if (monPlanning.get(lstTheme.getSelectedValue().toString()).containsKey(lstProjets.getSelectedValue().toString())){
-                            monPlanning.get(lstTheme.getSelectedValue().toString()).get(lstProjets.getSelectedValue().toString()).add(maTache);
-                        }else {
-                            taches = new ArrayList<>(); // on reset le hash map
+                    if (!monPlanning.containsKey(lstTheme.getSelectedValue())) { // S'il n'y a pas le theme
+
+                        mesProjets = new HashMap<>(); // on reset le hash map des projets
+                        taches = new ArrayList<>(); // on reset la liste des taches
+                        taches.add(maTache); // on ajoute l'objet des taches au tableau
+                        mesProjets.put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le tableau dans le hash map avec la clé des projets
+                        monPlanning.put(lstTheme.getSelectedValue().toString(), mesProjets); // on ajoute le hasmap de mes projets dans le hash map des planning avec le nom du theme en valeur
+
+                    } else { // Si la theme existe pas on va le rajouter
+
+                        mesProjets = new HashMap<>(); // on reset le hashmap des projets entier
+
+                        if (monPlanning.get(lstTheme.getSelectedValue().toString()).containsKey(lstProjets.getSelectedValue().toString())){ // on recupere le nom du theme et on regarde s'il a une clé
+                            monPlanning.get(lstTheme.getSelectedValue().toString()).get(lstProjets.getSelectedValue().toString()).add(maTache); // on ajoute ma tache au theme
+
+                        }else { // sinon
+
+                            taches = new ArrayList<>(); // on reset le tableau
                             taches.add(maTache); // on ajoute l'objet au tableau
-                            monPlanning.get(lstTheme.getSelectedValue().toString()).put(lstProjets.getSelectedValue().toString(), taches);
+                            monPlanning.get(lstTheme.getSelectedValue().toString()).put(lstProjets.getSelectedValue().toString(), taches); // on ajoute le projet au theme en clé et l'objet ma tache en valeur
+
                         }
                     }
-
+                    // on definie en null les noeuds principaux
                     DefaultMutableTreeNode noeudTheme = null;
                     DefaultMutableTreeNode noeudProjets = null;
                     DefaultMutableTreeNode noeudTache = null;
 
-                    root.removeAllChildren();
+                    root.removeAllChildren(); // on enleve les noeud de bases
 
-                    for (String thm : monPlanning.keySet()) {
-                        noeudTheme = new DefaultMutableTreeNode(thm);
+                    for (String thm : monPlanning.keySet()) { // pour chaque clé de projets
+                        noeudTheme = new DefaultMutableTreeNode(thm); // on met le noeud avec le nom du theme
 
-                        for (String prj : monPlanning.get(thm).keySet()) {
-                            noeudProjets = new DefaultMutableTreeNode(prj);
+                        for (String prj : monPlanning.get(thm).keySet()) { // pour chaque clé de themes
+                            noeudProjets = new DefaultMutableTreeNode(prj);  // on met le noeud avec le nom du projet
 
-                            for (Tache tch : monPlanning.get(thm).get(prj)) {
-                                noeudTache = new DefaultMutableTreeNode(tch.getNomTache());
-                                noeudProjets.add(noeudTache);
+                            for (Tache tch : monPlanning.get(thm).get(prj)) { // pour chaque taches
+                                noeudTache = new DefaultMutableTreeNode(tch.getNomTache()); // ajoute un noeud de la tache
+                                noeudProjets.add(noeudTache); // ajoute le noeud de la tache au noeud projets
                                 noeudTache = new DefaultMutableTreeNode(tch.getNomDeveloppeur());
                                 noeudProjets.add(noeudTache);
                                 noeudTache = new DefaultMutableTreeNode(tch.isEstTerminee());
                                 noeudProjets.add(noeudTache);
                             }
-                            noeudTheme.add(noeudProjets);
+                            noeudTheme.add(noeudProjets); // ajoute le noeud de projets dans le noeud theme
                         }
-                        root.add(noeudTheme);
+                        root.add(noeudTheme); // ajoute le noeud theme au noeud principale
                     }
-                    model = new DefaultTreeModel(root);
-                    trTache.setModel(model);
+                    model = new DefaultTreeModel(root); // definie le model avec le route
+                    trTache.setModel(model); // ajoute le model au Jtree
 
-
+                    JOptionPane.showMessageDialog(null, "Ajout reussi"); // message de reussite
                 }
-                JOptionPane.showMessageDialog(null, "Ajout reussi");
+
             }
         });
     }
